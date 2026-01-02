@@ -1,0 +1,295 @@
+% ****** Start of file template-FFR120-FYM120-blindtext.tex ******
+%
+% use on Overleaf!!!!
+%
+\documentclass[%
+ reprint,
+ amsmath,amssymb,
+ aps,
+]{revtex4-2}
+
+\usepackage{graphicx}% Include figure files
+\usepackage{dcolumn}% Align table columns on decimal point
+\usepackage{bm}% bold math
+\usepackage{hyperref}% add hypertext capabilities
+%\usepackage[mathlines]{lineno}% Enable numbering of text and display math
+%\linenumbers\relax % Commence numbering lines
+\usepackage{xcolor}
+
+\usepackage{lipsum}
+
+\begin{document}
+
+\title{[Project code] Project Title (This the title of your project, and not the title of the chosen project topic)}% Force line breaks with \\
+
+\author{Nameone Authorone [}
+\author{Nametwo Authortwo [}
+\author{Namethree Authorthree]]]}
+
+\date{\today}% It is always \today, today,
+             %  but any date may be explicitly specified
+
+\begin{abstract} %%% DO NOT CHANGE!
+%%% - B1 - %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%% Customize this part: text between - B1 - and - E1 - must not appear in the final report 
+\noindent
+\fbox{\parbox[t][][t]{0.77\columnwidth}{
+\textbf{Points:} \fbox{\bf \textcolor{magenta}{5}} out of \textbf{44} \\
+Here goes the abstract of your project. No references in the abstract! 
+The following part in \textcolor{cyan}{cyan} is just blind text that shows \emph{approximately} how long the text in each part should look like. {\bf USE OVERLEAF!!!}
+}} 
+\textcolor{cyan}{Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? }
+%%% - E1 - %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{description} %%% DO NOT CHANGE!
+\item[Project Topic] %%% DO NOT CHANGE!
+{Title of the project topic you have chosen.} %CHANGE accordingly
+\item[Teaching Assistant] %%% DO NOT CHANGE!
+{Name of the TA proposing the project} % CHANGE accordingly
+\end{description} %%% DO NOT CHANGE!
+\end{abstract}
+
+\maketitle
+
+
+
+
+\section{\label{sec:intro}Introduction} %%% DO NOT CHANGE!
+
+%%% - B2 - %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%% Customize this part: text between - B2 - and - E2 - must not appear in the final report 
+\noindent
+\fbox{\parbox[t][][t]{\columnwidth}{
+\textbf{Points:} \fbox{\bf \textcolor{magenta}{5}} out of \textbf{44}
+
+In this section you have to: 
+Provide the reader of the general context of the research question that you chose to investigate, providing the relevant peer-reviewed references.  For example, a citation looks like \cite{surname1999peer} or \cite{cognome2001what, smullyan2025what}.
+
+Remember: No subsectioning in the introduction.
+
+For references, use the command $\backslash${\tt cite}$\{\cdots\}$. \\
+Example: $\backslash${\tt cite}$\{${\tt polya1945how}$\}$ gives \cite{polya1945how}. 
+Use the bib file {\tt biblio-FFR120-FYM119.bib} (provided with this template) for the bib items.
+}}
+
+\textcolor{cyan}{\lipsum[4-6]}
+%%% - E2 - %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+
+\section{\label{sec:overview}Overview} %%% DO NOT CHANGE!
+
+%%% - B3 - %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%% Customize this part: text between - B3 - and - E3 - must not appear in the final report 
+\noindent
+\fbox{\parbox[t][][t]{\columnwidth}{
+\textbf{Points:} \fbox{\bf \textcolor{magenta}{6}} out of \textbf{44}
+
+{In this section you provide an overview of the state of the art, related work and methods. Mention the methods that you could apply in your project, highlighting their use case scenarios, their features with advantages and disadvantages, and state whether they can be appropriate to use in your project. After this overview, you should state the method/model that you choose and also provide the motivation of your choice.
+Make a table (see below) to summarize this discussion. Refer to the table (Tab.~\ref{tab:methodsoverview}) in the text.} 
+}}
+
+\begin{table*}
+    \caption{{\bf Overview of simulation methods/models (change this table title with something more appropriate).} Write some explanatory text for the table. This table contain bilndtext for example purpose. \textcolor{blue}{\bf A table describing the Overview methods/models is MANDATORY.} Missing to include one causes a {\bf deduction} (-3 points). 
+} 
+    \label{tab:methodsoverview}
+    %\begin{tabular}{|p{2cm}|p{3cm}|p{6cm}|p{6cm}|} % this line might not work in Overleaf
+    \begin{tabular}{|c|c|c|c|} % If the above does not work, use this one, or: \begin{tabular}{|l|l|l|l|}
+    \hline
+       {\bf Method / Model }  &  {\bf Use case scenario }   &  {\bf Features }  &  {\bf Suitable for the project? }   \\ 
+    \hline
+        \textcolor{cyan}{Insert name 1}  & 
+        \textcolor{cyan}{Mention where it is used} & 
+        \textcolor{cyan}{Brief description} & 
+        \textcolor{cyan}{Brief motivation} \\
+    \hline
+        \textcolor{cyan}{Insert name 2}  & 
+        \textcolor{cyan}{Mention where it is used} & 
+        \textcolor{cyan}{Brief description} & 
+        \textcolor{cyan}{Brief motivation} \\
+    \hline
+        \textcolor{cyan}{Insert name 2}  & 
+        \textcolor{cyan}{Mention where it is used} & 
+        \textcolor{cyan}{Brief description} & 
+        \textcolor{cyan}{Brief motivation} \\
+    \hline
+    \end{tabular}
+\end{table*}
+
+\textcolor{cyan}{Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. }
+
+{\bf Method 1 (substitute with the name of the method).} {[Discuss the use case scenarios of the method, their features with advantages and disadvantages / strong and weak points, and whether it is more or less suitable for the research question. It is a good idea to reference the literature \cite{prenom2017find, surname1999peer}.]} 
+\textcolor{cyan}{Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. }
+
+{\bf Method 2 (substitute with the name of the method).} {[Discuss the use case scenarios of the method, their features with advantages and disadvantages / strong and weak points, and whether it is more or less suitable for the research question. It is a good idea to reference the literature \cite{prenom2017find, surname1999peer}.]} 
+\textcolor{cyan}{Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. }
+
+{\bf Method 3 (substitute with the name of the method).} {[Discuss the use case scenarios of the method, their features with advantages and disadvantages / strong and weak points, and whether it is more or less suitable for the research question. It is a good idea to reference the literature \cite{prenom2017find, surname1999peer}.]} 
+\textcolor{cyan}{Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. }
+
+\textcolor{cyan}{[If it makes sense, add more methods in the overview.]} 
+\textcolor{cyan}{\lipsum[7]}
+%%% - E3 - %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+\section{\label{sec:method}Method} %%% DO NOT CHANGE!
+
+%%% - B4 - %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%% Customize this part: text between - B4 - and - E4 - must not appear in the final report 
+\begin{figure*}
+    \centering
+    \includegraphics[width=\textwidth]{Fig1_placeholder.pdf}
+    \caption{{\bf Method employed (change this text according to your project).} Write some explanatory text for the figure. Make sure that the figure is referenced in the text. The caption should be such that, together with the figure, allows the reader to understand the concepts in the figure itself. 
+    \textcolor{blue}{\bf A figure describing the method/model is MANDATORY.} Missing to include a figure causes a {\bf deduction} (-3  points). 
+    } 
+    \label{fig:selectedmethod}
+\end{figure*}
+
+\noindent
+\fbox{\parbox[t][][t]{\columnwidth}{
+\textbf{Points:} \fbox{\bf \textcolor{magenta}{8}} out of \textbf{44}
+
+Provide here the details of the method you have chosen for the project. 
+You should explain and provide enough detail such that your results can be reproduced following your method. 
+Compose a figure that contains / describes your method (mandatory). Refer to the figure (Fig.~\ref{fig:selectedmethod}) when describing the method in the text. 
+You can add a second figure if you believe it is necessary. 
+}}
+\textcolor{cyan}{\lipsum[10-15]}
+%%% - E4 - %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+\section{\label{sec:results}Results and Discussion} %%% DO NOT CHANGE!
+
+%%% - B5 - %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%% Customize this part: text between - B5 - and - E5 - must not appear in the final report 
+\noindent
+\fbox{\parbox[t][][t]{\columnwidth}{
+\textbf{Points:} \fbox{\bf \textcolor{magenta}{8}} out of \textbf{44}
+
+Here report and discuss the results of the project. 
+
+Remember to organize your results properly.  
+
+Reference your figures in the discussion. Example: Fig.~\ref{fig:res1}. 
+}}
+
+\textcolor{cyan}{\lipsum[1-2]}\\
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\columnwidth]{Fig3.pdf}
+    \caption{{\bf Title Figure.} Write some explanatory text for the figure. Make sure that the figure is referenced in the text. The caption should be such that, together with the figure, allows the reader to understand the concepts in the figure itself.} 
+    \label{fig:res1}
+\end{figure}
+
+\textcolor{cyan}{\lipsum[8-9]} 
+
+At some point in the discussion, Reference Fig.~\ref{fig:res2}. \\
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\columnwidth]{Fig2.pdf}
+    \caption{{\bf Title Figure.} Write some explanatory text for the figure. Make sure that the figure is referenced in the text. The caption should be such that, together with the figure, allows the reader to understand the concepts in the figure itself.} 
+    \label{fig:res2}
+\end{figure}
+
+\textcolor{cyan}{\lipsum[10-11]} 
+%%% - E5 - %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+\section{\label{sec:conclusion}Conclusions and Outlook} %%% DO NOT CHANGE!
+
+%%% - B6 - %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%% Customize this part: text between - B6 - and - E6 - must not appear in the final report 
+\noindent
+\fbox{\parbox[t][][t]{\columnwidth}{
+\textbf{Points:} \fbox{\bf \textcolor{magenta}{4}} out of \textbf{44}
+
+Here conclusions and outlook. 
+}}
+
+\textcolor{cyan}{\lipsum[1]}
+
+\textcolor{cyan}{Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem.  }
+%%% - E6 - %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+\section{\label{sec:Contribution}Contributions} %%% DO NOT CHANGE!
+
+%%% - B7 - %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%% Customize this part: text between - B7 - and - E7 - must not appear in the final report 
+\noindent
+\fbox{\parbox[t][][t]{\columnwidth}{
+\textbf{Points:} \fbox{\bf \textcolor{magenta}{1}} out of \textbf{44}
+
+Mandatory in all cases (also in the case of 1-person team). 
+
+Add some text. See a possible example text below.
+}}
+Example: A.B. and C.D. conceived and implemented ... (adapt). E.F., G.H., contributed to .... etc etc. All authors ... (adapt).
+%%% - E7 - %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+\section{\label{sec:COI}Conflict of Interest} %%% DO NOT CHANGE!
+
+%%% - B8 - %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%% Customize this part: text between - B8 - and - E8 - must not appear in the final report 
+\noindent
+\fbox{\parbox[b][][t]{\columnwidth}{
+\textbf{Points:} \fbox{\bf \textcolor{magenta}{1}} out of \textbf{44}
+
+Add some text. See the the following Note for a clarification.
+}}
+
+{{\bf Note:} A conflict of interest can also be known as {\emph competing interest}. A conflict of interest can occur when you, or your employer, or sponsor have a financial, commercial, legal, or professional relationship with other organizations, or with the people working with them, that could influence your research.
+For example check here:} \href{https://authorservices.taylorandfrancis.com/editorial-policies/competing-interest/}{https://authorservices.taylorandfrancis.com/editorial-policies/competing-interest/}
+%%% - E8 - %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+\section{\label{sec:datacode}Data and Code Availability} %%% DO NOT CHANGE!
+
+%%% - B9 - %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%% Customize this part: text between - B9 - and - E9 - must not appear in the final report 
+\noindent
+\fbox{\parbox[b][][t]{\columnwidth}{
+\textbf{Points:} \fbox{\bf \textcolor{magenta}{1}} out of \textbf{44}
+
+Add some text. See a possible text below.
+}}
+
+Data is available for download at ....  / can be accessed from ....
+
+All source code and examples are made publicly available at ... . The version used in this study is archived in ... with DOI ... 
+%%% - E9 - %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+%%% - B10 - %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%% Customize this part: text between - B10 - and - E10 - must not appear in the final report 
+\noindent
+\fbox{\parbox[b][][t]{\columnwidth}{
+Score for correct amount of relevant, peer reviewed {\bf References}: 
+\textbf{Points:} \fbox{\bf \textcolor{magenta}{5}} out of \textbf{44}
+}}
+
+
+\bibliography{biblio-FFR120-FYM119} %%% DO NOT CHANGE!
+% Produces the bibliography via BibTeX.
+
+\end{document}

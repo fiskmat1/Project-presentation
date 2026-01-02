@@ -1,0 +1,188 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage{tcolorbox}
+\usepackage{fontawesome5}
+
+% Colors
+\definecolor{sectioncolor}{RGB}{0,100,150}
+\definecolor{boxbg}{RGB}{245,248,250}
+\definecolor{quotebg}{RGB}{255,250,240}
+
+% Section formatting
+\titleformat{\section}{\Large\bfseries\color{sectioncolor}}{\thesection}{1em}{}
+\titleformat{\subsection}{\large\bfseries\color{sectioncolor!80}}{\thesubsection}{1em}{}
+
+% Quote box
+\newtcolorbox{quotebox}{
+  colback=quotebg,
+  colframe=orange!50!black,
+  boxrule=0.5pt,
+  arc=3pt,
+  left=10pt,
+  right=10pt,
+  top=8pt,
+  bottom=8pt
+}
+
+% Info box
+\newtcolorbox{infobox}{
+  colback=boxbg,
+  colframe=sectioncolor,
+  boxrule=0.5pt,
+  arc=3pt,
+  left=10pt,
+  right=10pt,
+  top=8pt,
+  bottom=8pt
+}
+
+\begin{document}
+
+\begin{center}
+{\LARGE\bfseries\color{sectioncolor} Quick Talking Points for Your Poster Presentation}\\[0.5em]
+{\large How High is the Field in That Cable Defect?}\\[1em]
+{\normalsize Jacob Larsson --- FFR120/FYM119}
+\end{center}
+
+\vspace{1em}
+
+\section*{The One-Sentence Summary}
+
+\begin{quotebox}
+\textit{``I simulated how tiny defects like air bubbles or water droplets inside high-voltage cable insulation change the electric field and increase the risk of electrical breakdown.''}
+\end{quotebox}
+
+%----------------------------------------------------------------------
+\section{WHAT is the problem? (Background)}
+%----------------------------------------------------------------------
+
+\subsection*{Simple explanation}
+
+\begin{quotebox}
+``High-voltage cables have plastic insulation (called XLPE) that keeps the electricity contained. But during manufacturing or over time, small defects can form---like tiny air bubbles or water droplets trapped inside. These defects have different electrical properties than the plastic, so they disturb the electric field. If the field gets too strong in one spot, it can cause sparks inside the cable, which damages it over time.''
+\end{quotebox}
+
+\textbf{Key phrase to remember:} \textit{``Defects are like weak spots that can concentrate the electric stress.''}
+
+%----------------------------------------------------------------------
+\section{WHAT did you do? (Method)}
+%----------------------------------------------------------------------
+
+\subsection*{Simple explanation}
+
+\begin{quotebox}
+``I created a 2D computer model of a cable cross-section. I set the inner conductor to 15,000 volts and the outer to zero. Then I solved the electrostatic equation on a grid of 720$\times$720 points to find the electric potential everywhere. From the potential, I calculated the electric field. I compared three cases: a perfect cable, one with an air bubble, and one with a water-like inclusion.''
+\end{quotebox}
+
+\subsection*{If asked ``How does the solver work?''}
+
+\begin{quotebox}
+``The solver uses the finite volume method. It divides the space into small boxes and makes sure the electric flux is conserved across each box. Where materials meet (like air and plastic), I use a special averaging technique so the physics stays correct at the boundary.''
+\end{quotebox}
+
+\subsection*{Key equation (point to poster)}
+
+\begin{infobox}
+\[
+\nabla \cdot (\varepsilon \nabla V) = 0
+\]
+This means ``the electric flux has no sources inside the insulation.''
+\end{infobox}
+
+%----------------------------------------------------------------------
+\section{WHAT did you find? (Results)}
+%----------------------------------------------------------------------
+
+\subsection*{Air bubble ($\varepsilon_r = 1$)}
+
+\begin{quotebox}
+``The field \textbf{inside} the air bubble is about 1.45\,kV/mm, which is roughly \textbf{5--10\% higher} than the undisturbed field at that location. This matters because air can ionize and start partial discharges if the field is too strong.''
+\end{quotebox}
+
+\subsection*{Water-like inclusion ($\varepsilon_r = 80$)}
+
+\begin{quotebox}
+``The field \textbf{inside} the water stays low ($\sim$1.3\,kV/mm), but it gets \textbf{squeezed into the plastic around it}, reaching about 1.7\,kV/mm---that's \textbf{20--25\% higher} than normal. This puts stress on the insulation.''
+\end{quotebox}
+
+\subsection*{Global peak}
+
+\begin{quotebox}
+``The overall maximum field in the cable (about 6\,kV/mm near the inner conductor) barely changes---less than 1\%---because the defect is small and far from the electrode.''
+\end{quotebox}
+
+%----------------------------------------------------------------------
+\section{SO WHAT? (Conclusion)}
+%----------------------------------------------------------------------
+
+\begin{quotebox}
+``My simulations show these defects don't dramatically change the global field, but they create \textbf{local hot spots}. The good news: the field enhancements I found are still below typical partial-discharge thresholds for mm-sized air gaps. But repeated stress at these spots could still degrade the cable over time.''
+\end{quotebox}
+
+\subsection*{Future work}
+
+\begin{quotebox}
+``We could study defects closer to the electrodes, non-spherical shapes, or multiple defects at once---cases where the field might exceed safe limits.''
+\end{quotebox}
+
+%----------------------------------------------------------------------
+\section{Common Questions \& Answers}
+%----------------------------------------------------------------------
+
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{>{\raggedright\arraybackslash}p{5.5cm} >{\raggedright\arraybackslash}p{9cm}}
+\toprule
+\textbf{Question} & \textbf{Short Answer} \\
+\midrule
+\textit{Why finite volume and not finite element?} & FVM is simpler for rectangular grids and naturally conserves flux at material interfaces---perfect for our $\varepsilon$-jump problem. \\
+\textit{Why 2D and not 3D?} & A 2D cross-section captures the essential physics. 3D would be much more expensive computationally. \\
+\textit{What's the permittivity $\varepsilon$?} & It measures how much a material resists electric field penetration. Air $\varepsilon \approx 1$, plastic $\varepsilon \approx 2.3$, water $\varepsilon \approx 80$. \\
+\textit{What voltage did you use?} & 15\,kV---typical for medium-voltage distribution cables. \\
+\textit{What size defect?} & 0.5\,mm radius bubble, placed in the middle of the insulation. \\
+\textit{What's partial discharge?} & Small sparks inside the insulation that don't fully bridge the gap but slowly damage the material over time. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+%----------------------------------------------------------------------
+\section{Key Numbers to Remember}
+%----------------------------------------------------------------------
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{ll}
+\toprule
+\textbf{Parameter} & \textbf{Value} \\
+\midrule
+Voltage & 15\,kV \\
+Inner radius & 2\,mm \\
+Outer radius & 10\,mm \\
+XLPE permittivity & 2.3 \\
+Air bubble $\varepsilon_r$ & 1 \\
+Water inclusion $\varepsilon_r$ & 80 \\
+Defect radius & 0.5\,mm \\
+Peak field (ideal cable) & $\sim$6\,kV/mm at inner conductor \\
+Field enhancement (bubble) & 5--10\% locally \\
+Field enhancement (water) & 20--25\% in surrounding XLPE \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vfill
+\begin{center}
+\textit{Good luck with your presentation!}
+\end{center}
+
+\end{document}
+
+
+
+

@@ -1,0 +1,10 @@
+{
+  "Emax_global": 6031942.582025762,
+  "x_at_Emax": 0.008607362904265862,
+  "y_at_Emax": 0.011112367272263026,
+  "E_ideal_Rin": 4660012.009197089,
+  "enhancement_vs_ideal": 1.2944049436183864,
+  "defect_radius_m": 0.0005,
+  "defect_center_x": 0.0166,
+  "defect_center_y": 0.0106
+}

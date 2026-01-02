@@ -1,0 +1,11 @@
+{
+  "Emax_global": 40532351.20324027,
+  "Emax_global_x": 0.008492564141219931,
+  "Emax_global_y": 0.0006316086853985001,
+  "Emax_air_near_junction": 40532351.20324027,
+  "Emax_air_near_junction_x": 0.008492564141219931,
+  "Emax_air_near_junction_y": 0.0006316086853985001,
+  "Dn_air_at_interface": -31546280.030525174,
+  "Dn_dielectric_at_interface": -216566785.47623867,
+  "Dn_ratio_die_over_air": 6.865049865362313
+}

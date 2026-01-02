@@ -1,0 +1,149 @@
+\documentclass[%
+ reprint,
+ amsmath,amssymb,
+ aps,
+]{revtex4-2}
+
+\usepackage{graphicx}
+\usepackage{dcolumn}
+\usepackage{bm}
+\usepackage{hyperref}
+\usepackage{xcolor}
+
+\begin{document}
+
+\title{Electric Field Concentration in Coaxial HV Cables due to Dielectric Defects: Simulation and Analysis}
+
+\author{Jacob Larsson}
+\date{\today}
+
+\begin{abstract}
+We investigate how localized dielectric defects (air bubbles and high-permittivity inclusions) in the insulation of a coaxial high-voltage cable alter the electric field and breakdown risk. A 2D cross-section model solves \(\nabla \cdot (\epsilon \nabla V)=0\) on a stretched grid with harmonic-averaged face permittivities to preserve normal-flux continuity at material jumps. We benchmark against the ideal coax solution \(E_0(r)=V_0/[r\ln(R_\mathrm{out}/R_\mathrm{in})]\) and quantify defect-driven peak-field amplification. Results show strong local enhancement at the defect boundary: reduced-\(\epsilon_r\) voids intensify the field in the insulation, while water-like inclusions redistribute the field with angular dependence. The workflow produces publication-quality figures and is suitable for design screening of defect sensitivity.
+\end{abstract}
+
+\begin{description}
+\item[Project Topic]
+Coaxial cable / HV cable with a defect in the insulation
+\item[Teaching Assistant]
+TBD
+\end{description}
+
+\maketitle
+
+\section{\label{sec:intro}Introduction}
+Coaxial and power cables rely on homogeneous polymer insulation (e.g., XLPE, \(\epsilon_r\!\approx\!2.3\)) to maintain controlled electric fields. Local defects such as air voids (\(\epsilon_r\!\approx\!1\)) or moisture inclusions (\(\epsilon_r\!\sim\!80\)) perturb permittivity, causing field crowding that can precipitate partial discharges, treeing, or breakdown. For an ideal homogeneous coax, the field is purely radial with \(E_0(r)=V_0/[r\ln(R_\mathrm{out}/R_\mathrm{in})]\) \cite{jackson1999classical}. Any heterogeneity breaks this symmetry and can significantly amplify \(|E|\) locally. Understanding these effects supports insulation design and condition assessment in HV asset management \cite{kuffel2000highvoltage}.
+
+This work develops a computational study of a 2D cross-section of a coaxial cable with embedded defects. We solve the electrostatic problem with spatially varying \(\epsilon(x,y)\) and validate against the analytical coax baseline. We then quantify peak \(|E|\) and compare with classical inception criteria (context from gas discharge theory \cite{raether1964avalanches,meek1940breakdown} and solid-dielectric field design \cite{kuffel2000highvoltage}).
+
+\section{\label{sec:overview}Overview}
+We consider four modeling options relevant to electrostatics in heterogeneous dielectrics: analytical coax (homogeneous), finite difference (FD), finite volume (FVM), finite element (FEM), and boundary element (BEM). Table~\ref{tab:methods} summarizes use cases.
+
+\begin{table*}
+  \caption{{\bf Overview of modeling options for coaxial insulation with defects.}}
+  \label{tab:methods}
+  \begin{tabular}{|c|c|c|c|}
+    \hline
+    {\bf Method} & {\bf Use case} & {\bf Features} & {\bf Suitability} \\
+    \hline
+    Analytical coax & Homogeneous \(\epsilon\) & Closed-form \(E_0(r)\); no defects & Baseline only \\
+    \hline
+    FD (node-based) & Structured grids & Simple stencils; discontinuous \(\epsilon\) needs care & OK with special treatment \\
+    \hline
+    FVM (face fluxes) & Heterogeneous media & Conserves flux; harmonic-mean \(\epsilon\) at faces \cite{eymard2000fvm} & Excellent for \(\epsilon\)-jumps \\
+    \hline
+    FEM (unstructured) & Complex geometries & Flexible meshing; robust material interfaces & Excellent; highest flexibility \\
+    \hline
+    BEM & Piecewise homogeneous & Reduces dimensionality; interfaces explicit & Good if few regions \\
+    \hline
+  \end{tabular}
+\end{table*}
+
+We adopt a finite-volume-like discretization on a stretched Cartesian grid that accurately enforces normal-displacement continuity across \(\epsilon\)-jumps via harmonic averaging at faces \cite{eymard2000fvm}. This provides excellent accuracy for embedded voids/inclusions without requiring body-fitted meshes.
+
+\section{\label{sec:method}Method}
+We model a coaxial cross-section with inner conductor at \(V_0\) and outer conductor at 0~V. The dielectric annulus has \(\epsilon_r=\)~2.3 (XLPE surrogate). A circular defect is embedded at mid-radius (default), with two cases: (i) air bubble, \(\epsilon_r=1\); (ii) water-like inclusion, \(\epsilon_r=80\) \cite{lidelcrc}. Dirichlet electrodes are painted along circles \(r=R_\mathrm{in}, R_\mathrm{out}\). The computational rectangle uses zero-flux boundaries far from electrodes. The linear system from \(\nabla\cdot(\epsilon\nabla V)=0\) is solved with preconditioned CG; gradients yield \(\mathbf{E}=-\nabla V\).
+
+\begin{figure*}
+  \centering
+  \includegraphics[width=\textwidth]{figures/method_overview.png}
+  \caption{{\bf Geometry, materials, and field visualization.} Example overview panel showing \(V\), \(|E|\) (log), and streamlines. Electrodes (magenta) and materials (dielectric blue overlay, defect yellow) are overlaid.}
+  \label{fig:method}
+\end{figure*}
+
+We benchmark via the ideal coax field \(E_0(r)\) and report enhancement factors \(|E|_\mathrm{max}/E_0(R_\mathrm{in})\). Stretched grids cluster points near interfaces and the cable center to resolve field gradients efficiently.
+
+\section{\label{sec:results}Results and Discussion}
+\textbf{Baseline (homogeneous).} The simulated radial profile agrees with \(E_0(r)\) within plotting resolution (Fig.~\ref{fig:baseline_radial}). This validates the solver and grid strategy against the analytical reference \cite{jackson1999classical}.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/baseline_radial.png}
+  \caption{{\bf Baseline radial field.} Simulated \(|E|(r)\) versus ideal coax \(E_0(r)\). Excellent agreement confirms correct treatment of geometry and boundary conditions.}
+  \label{fig:baseline_radial}
+\end{figure}
+
+\textbf{Air bubble (\(\epsilon_r=1\)).} The void concentrates field lines and produces a bright \(|E|\) ring on the insulation side of the defect boundary (Fig.~\ref{fig:bubble_overview}–\ref{fig:bubble_zoom}). Peak \(|E|\) increases significantly relative to baseline due to the low-\(\epsilon\) pocket forcing displacement continuity.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/bubble_overview.png}
+  \caption{{\bf Bubble case overview.} \(V\), \(|E|\) (log), and streamlines with overlays.}
+  \label{fig:bubble_overview}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/bubble_zoom.png}
+  \caption{{\bf Bubble zoom.} Local amplification at the defect boundary on the insulation side.}
+  \label{fig:bubble_zoom}
+\end{figure}
+
+\textbf{Water-like inclusion (\(\epsilon_r=80\)).} The high-\(\epsilon\) inclusion tends to pull equipotentials inward, redistributing the field and altering angular dependence (Fig.~\ref{fig:incl_overview}–\ref{fig:incl_zoom}). Local enhancement is more directional than for voids, consistent with continuity of normal \(D_n\) across the interface.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/inclusion_overview.png}
+  \caption{{\bf Inclusion case overview.} Field redistribution around a high-\(\epsilon\) region.}
+  \label{fig:incl_overview}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/inclusion_zoom.png}
+  \caption{{\bf Inclusion zoom.} Directional enhancement and distortion of field lines.}
+  \label{fig:incl_zoom}
+\end{figure}
+
+\textbf{Radial diagnostics.} Along a fixed ray, defect cases deviate from \(E_0(r)\) with excess near the defect radius (Fig.~\ref{fig:bubble_radial}, \ref{fig:incl_radial}). This provides a compact comparison metric and can be extended to angular sweeps for sensitivity studies.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/bubble_radial.png}
+  \caption{{\bf Bubble radial profile.} \(|E|(r)\) exhibits a pronounced bump near the defect boundary.}
+  \label{fig:bubble_radial}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/inclusion_radial.png}
+  \caption{{\bf Inclusion radial profile.} High-\(\epsilon\) inclusion modifies the radial dependence with angular sensitivity.}
+  \label{fig:incl_radial}
+\end{figure}
+
+\section{\label{sec:conclusion}Conclusions and Outlook}
+We built a high-fidelity simulator for coaxial cables with dielectric defects and demonstrated strong local field amplification at voids and directional redistribution for high-\(\epsilon\) inclusions. The methodology is conservative across \(\epsilon\)-jumps and validated against the analytical coax solution. Future work: (i) parametric sweeps over defect size/location/angle (CSV included), (ii) statistical defect ensembles, and (iii) linkage to inception criteria for solids and partial discharge inception under AC stress \cite{kuffel2000highvoltage}.
+
+\section{\label{sec:Contribution}Contributions}
+J.L. designed the study, implemented the geometry and solver workflow, executed simulations, and prepared the figures and manuscript.
+
+\section{\label{sec:COI}Conflict of Interest}
+The author declares no competing interests.
+
+\section{\label{sec:datacode}Data and Code Availability}
+All source code resides in the project repository under \texttt{dielectric\_breakdown/} and \texttt{coax\_defect/}. Reproducible figures and CSVs are in \texttt{coax\_defect/outputs/} and are copied into \texttt{coax\_defect/report/figures/} for Overleaf. The exact scripts used are \texttt{coax\_defect/run.py} and \texttt{coax\_defect/sweep.py}.
+
+\bibliography{biblio}
+
+\end{document}
+
+

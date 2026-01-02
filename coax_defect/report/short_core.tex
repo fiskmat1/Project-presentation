@@ -1,0 +1,214 @@
+\documentclass[%
+ 
+ reprint,
+ 
+ amsmath,amssymb,
+ 
+ aps,
+ 
+]{revtex4-2}
+
+\usepackage{graphicx}
+
+\usepackage{dcolumn}
+
+\usepackage{bm}
+
+\usepackage{hyperref}
+
+\usepackage{xcolor}
+
+\begin{document}
+
+\title{Electric Field Concentration in Coaxial HV Cables due to Dielectric Defects: Simulation and Analysis}
+
+\author{Jacob Larsson}
+
+\date{\today}
+
+\begin{abstract}
+
+We investigate how localized dielectric defects, like air bubbles and high-permittivity inclusions, in the insulation of a coaxial high-voltage cable affect the electric field and breakdown risk. A 2D cross-section model solves \(\nabla \cdot (\epsilon \nabla V)=0\) on a stretched grid with harmonic-averaged face permittivities to preserve normal-flux continuity at material boundaries. We benchmark against the ideal coax solution \(E_0(r)=V_0/[r\ln(R_\mathrm{out}/R_\mathrm{in})]\) and quantify defect-driven peak-field amplification. The main finding is that air bubbles create strong field concentration around them, which increases breakdown risk. Water droplets also change the field pattern but in a different way.
+
+\begin{description}
+
+\item[Project Topic]
+
+B
+
+\item[Teaching Assistant]
+
+Agnese Callegari
+
+\end{description}
+
+\end{abstract}
+
+\maketitle
+
+\section{\label{sec:intro}Introduction}
+
+\noindent Coaxial and power cables use solid polymer insulation, e.g. XLPE with relative permittivity \(\epsilon_r \approx 2.3\), to keep the electric field under control. In practice, manufacturing imperfections, ageing and moisture can create smaller regions with very different permittivity, such as air bubbles (\(\epsilon_r \approx 1\)) or water-filled pockets (\(\epsilon_r \sim 80\)). These inhomogeneities can disturb the otherwise smooth radial field of an ideal coaxial cable, for which the analytical field is
+
+\(E_0(r) = V_0/[r\ln(R_\mathrm{out}/R_\mathrm{in})]\) \cite{jackson1999classical}, and can locally increase \(|E|\) enough to trigger partial discharges or even breakdown. Understanding how defects like that modify the field is important for cable design and condition assessment in high-voltage systems \cite{kuffel2000highvoltage}.
+
+\\
+
+\\
+
+This work presents a numerical study of a 2D cross-section of a coaxial cable with embedded defects. We solve the electrostatic problem with a spatially varying permittivity \(\epsilon(x,y)\) and first verify the solution against the analytical, defect-free coax case. We then compute the electric field, extract peak values in the XLPE and inside the defects, and compare these to typical breakdown and partial-discharge fields reported in the literature \cite{raether1964avalanches,meek1940breakdown,kuffel2000highvoltage}.
+
+\section{\label{sec:overview}Overview}
+
+\noindent We consider four modeling options relevant to electrostatics in heterogeneous dielectrics: analytical coax (homogeneous), finite difference (FD), finite volume (FVM), finite element (FEM), and boundary element (BEM). Table~\ref{tab:methods} summarizes use cases.
+
+\\
+
+\begin{table*}
+
+  \caption{{\bf Overview of modeling options for coaxial insulation with defects.}}
+
+  \label{tab:methods}
+
+  \begin{tabular}{|c|c|c|c|}
+
+    \hline
+
+    {\bf Method} & {\bf Use case} & {\bf Features} & {\bf Suitability} \\
+
+    \hline
+
+    Analytical coax & Homogeneous \(\epsilon\) & Closed-form \(E_0(r)\); no defects & Baseline only \\
+
+    \hline
+
+    FD (node-based) & Structured grids & Simple stencils; discontinuous \(\epsilon\) needs care & OK with special treatment \\
+
+    \hline
+
+    FVM (face fluxes) & Heterogeneous media & Conserves flux; harmonic-mean \(\epsilon\) at faces \cite{eymard2000fvm} & Excellent for \(\epsilon\)-jumps \\
+
+    \hline
+
+    FEM (unstructured) & Complex geometries & Flexible meshing; robust material interfaces & Excellent; highest flexibility \\
+
+    \hline
+
+    BEM & Piecewise homogeneous & Reduces dimensionality; interfaces explicit & Good if few regions \\
+
+    \hline
+
+  \end{tabular}
+
+\end{table*}
+
+\noindent \textbf{Analytical solution.} For a homogeneous coaxial cable without defects, the electric field can be calculated exactly as \(E_0(r) = V_0/[r\ln(R_\mathrm{out}/R_\mathrm{in})]\). This gives us a baseline to validate our numerical methods and to measure how much the defects change the field.
+
+\\
+
+\\
+
+\textbf{Finite Difference Method (FD).} This is the simplest numerical approach where we approximate derivatives using differences between neighboring grid points. It works well for uniform materials but FD can give incorrect field jumps at material interfaces.
+
+\\
+
+\\
+
+\textbf{Finite Volume Method (FVM).} Instead of working with point values, FVM divides the domain into small volumes and ensures that electric flux is conserved across each volume. This naturally handles material interfaces by using appropriate averaging of material properties at the boundaries between volumes. This is particularly good for our problem with embedded defects \cite{eymard2000fvm}.
+
+\\
+
+\\
+
+\textbf{Finite Element Method (FEM).} FEM is very flexible and can handle complex geometries by dividing the domain into triangular or quadrilateral elements. It incorporates material interfaces and boundary conditions. A problem is that it requires more advanced mesh generation.
+
+\\
+
+\\
+
+\textbf{Boundary Element Method (BEM).} BEM only discretizes the boundaries between different materials rather than the entire domain. This can be very efficient when there are just a few homogeneous regions. For a simple air bubble in XLPE, BEM could work well, but it becomes more complex as we add more defects or vary their positions.
+
+\\
+
+\\
+
+For this study, we choose a finite-volume approach on a Cartesian grid since it provides a good balance. It handles material interfaces correctly through flux conservation, doesn't require complex mesh generation, and is straightforward to implement for our circular geometry with included defects.
+
+\section{\label{sec:method}Method}
+
+\noindent We model the coaxial cross-section with inner conductor at \(V_0\) and outer conductor at 0~V. The dielectric part has \(\epsilon_r=\)~2.3. A circular defect is put in the middle of the radius with two cases: (i) air bubble, \(\epsilon_r=1\) (ii) inclusion, \(\epsilon_r=80\) \cite{lidelcrc}. The outer edges of the rectangular domain are placed far from the cable and are given zero normal field (no-flux) boundary conditions to mimic open space. The linear system from \(\nabla\cdot(\epsilon\nabla V)=0\) is solved with conjugate-gradient to get $V$ and then we compute \(\mathbf{E}=-\nabla V\).
+
+\\
+
+\\
+
+We solve for the potential \(V(x,y)\) in the cable cross-section from
+
+\[
+
+\nabla\!\cdot\!\left(\epsilon(x,y)\,\nabla V\right)=0,
+
+\]
+
+where \(\epsilon(x,y)\) is the relative permittivity map (XLPE in the annulus, air or water-like inside the defect, and \(\epsilon{=}1\) outside). Where materials meet the potential is continuous and the normal component of \(\epsilon\nabla V\) is continuous.
+
+\\
+
+\\
+
+We work on a non-uniform Cartesian grid. At each interior grid point we relate the potential to the values at its neighbouring points using finite differences. This gives one linear equation for each unknown \(V_{i,j}\), and together these equations form the system that we solve numerically. Across material boundaries we use a harmonic average of the permittivities on each side of the interface \cite{eymard2000fvm} which helps make the normal flux continous and avoids weirds jumps in \(|E|\). Grid points on the conductors are set to their fixed voltages \(V_0\) or 0.
+
+\\
+
+\\
+
+Because the computational domain is rectangular, we mark all grid nodes whose distance from the cable center is close to \(R_\mathrm{in}\) or \(R_\mathrm{out}\). Those nodes are assigned \(V_0\) and \(0\) respectively and excluded from the interior system of equations. In this way the electrodes keep their circular shape even though the underlying grid is rectangular.
+
+\\
+
+\\
+
+To resolve sharp field gradients near the electrodes and the defect without making the grid unnecessarily large, we use a mildly stretched grid. The stretching function clusters nodes around \(R_\mathrm{in}\), \(R_\mathrm{out}\) and the cable centre. In all runs we ensure there are at least 20--30 grid points across the defect diameter and across the insulation thickness, and we checked that refining the grid further changes the peak field by less than a few percent.
+
+\\
+
+\\
+
+Putting all equations together gives a large linear system \(A\,v = b\) for the unknown nodal potentials. Most entries in \(A\) are zero because each grid point only couples to its neighbours. We solve this system with a standard conjugate-gradient iterative solver.
+
+\\
+
+\\
+
+Once \(V\) is known, the electric field components are obtained from finite differences,
+
+\(E_x \approx -\partial V/\partial x\) and \(E_y \approx -\partial V/\partial y\), and the magnitude is \(|E|=\sqrt{E_x^2+E_y^2}\). From these fields we make plots of \(V\) and \(|E|\), streamlines, and we extract the peak values in XLPE and inside the defect that we use in the breakdown discussion.
+
+\\
+
+\\
+
+The solid insulation in this study is cross-linked polyethylene (XLPE); both defect types are embedded in this same base material. Our primary quantity of interest for the solid is the peak electric field in XLPE, \(|E|_\mathrm{pk,XLPE}\), because long-term ageing and breakdown depends on the stress in the dielectric rather than in the defect itself \cite{kuffel2000highvoltage}. In an applied setting \(|E|_\mathrm{pk,XLPE}\) would be checked against values from datasheets or standards that say how much electric field the insulation can safely withstand. Here we highlight how different defect scenarios modify \(|E|_\mathrm{pk,XLPE}\) relative to the homogeneous coax reference.
+
+\\
+
+\\
+
+For air cavities we use the peak electric field inside the bubble, \(|E|_\mathrm{pk,air}\), as an indicator for partial discharge (PD) risk. Published data on gas discharges \cite{raether1964avalanches,meek1940breakdown} give typical values for the electric field at which PD starts in air at 1 bar and for millimetre-sized gaps. We call such a representative value \(E_{\mathrm{inc},\mathrm{air}}(p,R_d)\). If \(|E|_\mathrm{pk,air}\) is clearly below this value, PD in the bubble is unlikely; if it is similar to or higher than \(E_{\mathrm{inc},\mathrm{air}}\) PD becomes more likely. In the results we therefore comment on how different defect cases change \(|E|_\mathrm{pk,XLPE}\) and \(|E|_\mathrm{pk,air}\) relative to these reference values.
+
+\\
+
+\\
+
+Before using the fields for breakdown assessment, we first verify our numerical method against the analytical coax solution (\(V(r)=V_0\ln(r/R_\mathrm{out})/\ln(R_\mathrm{in}/R_\mathrm{out})\); \(E_0(r)=V_0/[r\ln(R_\mathrm{out}/R_\mathrm{in})]\)) and confirm mesh convergence of \(|E|\) and \(|E|_\mathrm{max}\).
+
+\\
+
+\\
+
+We use the analytical field for an ideal coaxial cable, \(E_0(r)\), as a reference and also report the ratio \(\eta=|E|_\mathrm{max}/E_0(R_\mathrm{in})\), which shows how much the peak field is increased by a defect. The grid is denser near the electrodes and the defect so that strong field gradients in these regions are captured accurately.
+
+\bibliography{biblio}
+
+\end{document}
+

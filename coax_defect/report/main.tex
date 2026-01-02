@@ -1,0 +1,321 @@
+% ****** Electric Field Concentration in Coaxial HV Cables ******
+%
+\documentclass[%
+ reprint,
+ amsmath,amssymb,
+ aps,
+]{revtex4-2}
+
+\usepackage{graphicx}
+\usepackage{dcolumn}
+\usepackage{bm}
+\usepackage{hyperref}
+\usepackage{xcolor}
+
+\begin{document}
+
+\title{Electric Field Concentration in Coaxial HV Cables due to Dielectric Defects: Simulation and Analysis}
+
+\author{Jacob Larsson}
+\affiliation{Chalmers University of Technology, Gothenburg, Sweden}
+
+\date{\today}
+
+\begin{abstract}
+Insulation defects such as voids and contaminants are a leading cause of failure in high-voltage cables. Industry data indicate that insulation faults account for the majority of internal failures in cross-linked polyethylene (XLPE) cables, making it important to understand how defects modify the local electric field. We investigate how small defects, specifically air bubbles and water-like inclusions, in the insulation of a coaxial high-voltage cable change the electric field distribution and the risk of breakdown. We model a 2D cross-section of the cable and solve the electrostatic equation $\nabla \cdot (\epsilon \nabla V)=0$ numerically on a Cartesian grid using a flux-conserving stencil with harmonic averaging of the permittivity at material interfaces. The results are compared with the analytical field for an ideal, defect-free coaxial cable, $E_0(r)=V_0/[r\ln(R_\mathrm{out}/R_\mathrm{in})]$. We find that the global peak field (at the inner electrode interface) changes by less than 1\% when adding a small defect at mid-radius. Locally at the defect position, the peak field inside an air void reaches about $1.45$~kV/mm, while a high-permittivity inclusion increases the peak field in the surrounding XLPE to about $1.74$~kV/mm (about 20\% above the defect-free value at the same radius). A larger void placed closer to the inner conductor can exceed a representative partial-discharge inception field for millimetre-scale gaps, highlighting the importance of defect position.
+
+\begin{description}
+\item[Project Topic]
+B
+\item[Teaching Assistant]
+Agnese Callegari
+\end{description}
+\end{abstract}
+
+\maketitle
+
+
+%=============================================================================
+\section{\label{sec:intro}Introduction}
+%=============================================================================
+
+Coaxial and power cables use solid polymer insulation, typically cross-linked polyethylene (XLPE) with relative permittivity $\epsilon_r \approx 2.3$, to maintain a controlled electric field between the high-voltage conductor and the grounded shield~\cite{kuffel2000highvoltage}. In an ideal, defect-free cable the electric field is purely radial and follows the analytical formula
+\begin{equation}
+E_0(r) = \frac{V_0}{r\ln(R_\mathrm{out}/R_\mathrm{in})},
+\label{eq:ideal_coax}
+\end{equation}
+where $V_0$ is the applied voltage and $R_\mathrm{in}$, $R_\mathrm{out}$ are the inner and outer conductor radii~\cite{jackson1999classical}. The field is strongest at the inner conductor surface and decreases with increasing radius.
+
+In practice, however, manufacturing imperfections, ageing, and moisture can create localised regions with permittivity very different from the bulk insulation. Common examples include air-filled voids ($\epsilon_r \approx 1$) and water-filled pockets ($\epsilon_r \approx 80$)~\cite{nordling2020physics}. Because the electric field inside a low-permittivity void is enhanced relative to the surrounding dielectric, such defects are known to initiate partial discharges (PD), i.e., localised breakdowns that do not immediately bridge the insulation but erode it over time, eventually leading to complete failure~\cite{dissado1992electrical,kuffel2000highvoltage}. Industry surveys confirm that insulation defects are a major reliability concern: according to CIGRE working-group reports, insulation-system faults account for roughly 64\% of internal failures in extruded HV cables~\cite{cigre2009}.
+
+Considerable research has been devoted to understanding the field enhancement caused by voids. For a spherical cavity in a uniform dielectric, electrostatics predicts an enhancement factor $f = 3\epsilon_r/(2\epsilon_r+1)$, which for XLPE ($\epsilon_r = 2.3$) gives $f \approx 1.23$~\cite{crichton1989pdmodel}. More detailed studies using finite-element analysis (FEA) have quantified how void size, shape, and position influence both the local field and PD inception voltage~\cite{illias2011fem}.
+
+In this project we develop a finite-volume solver on a Cartesian grid to study a 2D cross-section of a coaxial cable containing a single circular defect. We verify the solver against the analytical solution~\eqref{eq:ideal_coax}, then examine two defect scenarios: (i) an air bubble ($\epsilon_r = 1$) and (ii) a water-like inclusion ($\epsilon_r = 80$). We extract peak fields in the XLPE and inside the defect, compare them to typical PD inception values from the literature~\cite{meek1940breakdown,kuffel2000highvoltage}, and discuss the implications for cable reliability.
+
+
+%=============================================================================
+\section{\label{sec:overview}Overview of Methods}
+%=============================================================================
+
+Several numerical techniques are available for solving electrostatic problems with spatially varying permittivity. Table~\ref{tab:methods} summarises the main options and their suitability for the present study.
+
+\begin{table*}
+  \caption{{\bf Overview of modeling options for coaxial insulation with defects.}}
+  \label{tab:methods}
+  \begin{tabular}{|c|c|c|c|}
+    \hline
+    {\bf Method} & {\bf Use case} & {\bf Features} & {\bf Suitability} \\
+    \hline
+    Analytical coax & Homogeneous $\epsilon$ & Closed-form $E_0(r)$; no defects & Baseline only \\
+    \hline
+    FD (node-based) & Structured grids & Simple stencils; discontinuous $\epsilon$ needs care & OK with special treatment \\
+    \hline
+    FVM (face fluxes) & Heterogeneous media & Conserves flux; harmonic-mean $\epsilon$ at faces~\cite{eymard2000fvm} & Excellent for $\epsilon$-jumps \\
+    \hline
+    FEM (unstructured) & Complex geometries & Flexible meshing; robust material interfaces & Excellent; highest flexibility \\
+    \hline
+    BEM & Piecewise homogeneous & Reduces dimensionality; interfaces explicit & Good if few regions \\
+    \hline
+  \end{tabular}
+\end{table*}
+
+\textbf{Analytical solution.}
+For a homogeneous coaxial geometry the potential and field can be written in closed form (Eq.~\ref{eq:ideal_coax}). This provides an essential baseline for code verification and for quantifying how much defects perturb the field.
+
+\textbf{Finite Difference Method (FD).}
+FD approximates derivatives by differences between neighbouring grid values. It is straightforward to implement on uniform Cartesian grids but can produce spurious field jumps at material interfaces unless the discretisation accounts for the permittivity discontinuity~\cite{taflove2005fdtd}.
+
+\textbf{Finite Volume Method (FVM).}
+FVM discretises the domain into control volumes and keeps track of how much flux passes through each face. At a face between two materials the flux $\epsilon\,\partial V/\partial n$ must be continuous; using a harmonic average of the two permittivities naturally satisfies this condition~\cite{eymard2000fvm}. FVM is therefore well suited to problems with embedded inclusions.
+
+\textbf{Finite Element Method (FEM).}
+FEM divides the domain into triangular or quadrilateral elements and solves a weak (integral) form of the governing equation. It handles complex geometries and material interfaces elegantly, but requires mesh generation software and more involved implementation.
+
+\textbf{Boundary Element Method (BEM).}
+BEM reduces the problem to integrals over material interfaces only, which can be efficient when there are few homogeneous regions. For multiple or arbitrarily placed defects, however, the bookkeeping becomes cumbersome.
+
+\textbf{Choice of method.}
+We adopt a finite-volume-inspired approach on a Cartesian grid. This combines the simplicity of structured grids with correct handling of $\epsilon$-jumps (via flux continuity) and avoids the need for an external mesh generator.
+
+
+%=============================================================================
+\section{\label{sec:method}Method}
+%=============================================================================
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=0.95\textwidth]{figures/method_overview.png}
+    \caption{\textbf{Model geometry and typical output fields.} Example visualisation for the defect-free coaxial cable. Left: equipotential contours. Middle: $|\mathbf{E}|$ magnitude (log scale). Right: field-line streamplot. Circular Dirichlet regions represent the inner conductor at $V_0$ and the grounded outer conductor. Defect cases are created by assigning a different $\epsilon_r$ inside a small circular region in the XLPE insulation.}
+    \label{fig:method}
+\end{figure*}
+
+\subsection{Geometry and boundary conditions}
+
+We consider a 2D cross-section of a coaxial cable with inner conductor radius $R_\mathrm{in}=2~mm$ held at $V_0=15~kV$, and outer conductor radius $R_\mathrm{out}=10~mm$ grounded ($V=0$). The annular region between the conductors is filled with XLPE ($\epsilon_r=2.3$). A single circular defect is placed at the midpoint of the insulation thickness, i.e.\ at radial position $r_c = (R_\mathrm{in}+R_\mathrm{out})/2 = 6~mm$. Two defect types are studied:
+\begin{enumerate}
+    \item \textbf{Air bubble:} $\epsilon_r = 1$, radius $r_d=0.5~mm$ (simulating a void).
+    \item \textbf{Water-like inclusion:} $\epsilon_r = 80$, radius $r_d=0.3~mm$ (simulating moisture ingress).
+\end{enumerate}
+A baseline case with no defect (homogeneous XLPE) is included for validation.
+
+The computational domain is a square of side $L=2\cdot 1.06\,R_\mathrm{out}=21.2~mm$ centred on the cable axis. The outer edges of the square are given zero-flux (Neumann) boundary conditions to approximate open space. Nodes whose distance from the origin falls within a small tolerance of $R_\mathrm{in}$ or $R_\mathrm{out}$ are marked as Dirichlet nodes and assigned the conductor potentials. This ``staircase/band'' representation of circular electrodes on a Cartesian grid introduces a small geometric error localised near the interfaces; its impact is assessed by comparison to the analytical coax solution in Sec.~\ref{sec:results}.
+
+\subsection{Main equation}
+
+In the electrostatic limit the potential $V(x,y)$ satisfies
+\begin{equation}
+\nabla \cdot \bigl(\epsilon(x,y)\,\nabla V\bigr) = 0,
+\label{eq:laplace}
+\end{equation}
+where $\epsilon(x,y)$ is the spatially varying permittivity. At interfaces between materials, $V$ is continuous and the normal component of $\epsilon\nabla V$ (the displacement flux) is also continuous.
+
+\subsection{Finite-volume-inspired discretisation}
+
+We place a uniform Cartesian grid over the 2D cross-section and treat the voltage $V$ at the grid points as the unknowns. For points that are not on the electrodes, there is no free charge, so the net ``electric flux'' leaving a small box around the point should be zero. In practice, this means each interior voltage becomes a weighted average of its four nearest neighbours, where the weights depend on how easily the field can pass through the material.
+
+The most important detail is what happens at a material boundary (e.g.\ XLPE--air): the voltage is still continuous, but the amount of flux crossing the interface must also be consistent. To achieve this on a simple grid (without explicitly meshing the circular defect boundary), we assign an \emph{effective} permittivity to the connection between two neighbouring cells using the harmonic mean
+\begin{equation}
+\epsilon_\mathrm{face} = \frac{2\,\epsilon_L\,\epsilon_R}{\epsilon_L + \epsilon_R},
+\label{eq:harmonic}
+\end{equation}
+where $\epsilon_L$ and $\epsilon_R$ are the permittivities on the two sides of that face. Intuitively, this is the right kind of average when two different dielectrics ``sit in series'' across the interface: the lower-permittivity side limits the flux more strongly. Using $\epsilon_\mathrm{face}$ helps prevent unphysical jumps in flux at sharp $\epsilon$-changes and is commonly used in heterogeneous-media discretisations~\cite{eymard2000fvm}. Once this rule is applied everywhere, we iteratively update the voltages until they stop changing (next subsection).
+
+\subsection{Grid resolution}
+
+All simulations use a $720\times720$ grid in the square domain, corresponding to a uniform spacing of $\Delta x \approx 0.0295~mm$. This gives roughly 34 nodes across the 1.0~mm diameter air bubble and about 20 nodes across the 0.6~mm diameter inclusion, which is adequate for resolving the local perturbations shown in Figs.~\ref{fig:bubble_zoom} and~\ref{fig:inclusion_zoom}. The radial field profile also follows the analytical coax solution over most of the insulation thickness (Fig.~\ref{fig:baseline}).
+
+\subsection{Solver}
+
+The discretisation produces a large set of coupled equations (one per interior grid point). We solve them iteratively using successive over-relaxation (SOR), i.e.\ a Gauss--Seidel update with relaxation factor $\omega$~\cite{saad2003iterative}. Dirichlet nodes (electrodes) are held fixed at every iteration while all other nodes are updated until the maximum change per iteration falls below a prescribed tolerance.
+
+\subsection{Post-processing}
+
+Once $V$ is known, the electric field components are computed by \emph{central differences}, meaning that the slope at a grid point is estimated from the voltage values one step to the left and right (or down and up):
+\[
+E_x(i,j) \approx -\frac{V_{i+1,j}-V_{i-1,j}}{2\Delta x}, \qquad
+E_y(i,j) \approx -\frac{V_{i,j+1}-V_{i,j-1}}{2\Delta y},
+\]
+and the magnitude is $|\mathbf{E}| = \sqrt{E_x^2 + E_y^2}$. The values we want  and that we extract are the following:
+\begin{itemize}
+    \item $|E|_\mathrm{max,XLPE}$: peak field in the XLPE insulation.
+    \item $|E|_\mathrm{max,defect}$: peak field inside the defect (for air bubbles).
+    \item $|E|_\mathrm{max,ring}$: peak field in the XLPE immediately surrounding the defect (for high-$\epsilon$ inclusions).
+    \item Enhancement ratio $\eta = |E|_\mathrm{max}/E_0(R_\mathrm{in})$ relative to the ideal coax.
+\end{itemize}
+
+\subsection{Breakdown and PD criteria}
+
+For the XLPE insulation the relevant figure is the peak electric field in the solid polymer. For air-filled voids, partial discharge can initiate when the field inside the void exceeds a representative inception field. At atmospheric pressure and gap sizes of order 1~mm, a commonly cited order-of-magnitude threshold is $E_\mathrm{inc}\approx3~kV/mm$~\cite{meek1940breakdown,kuffel2000highvoltage}. If the simulated peak is well below this, PD most likely won't happen but if it's close or higher, PD becomes a possibility.
+
+
+%=============================================================================
+\section{\label{sec:results}Results and Discussion}
+%=============================================================================
+
+\subsection{Validation: homogeneous coaxial cable}
+
+Before introducing defects we verify the solver against the analytical solution. Figure~\ref{fig:baseline} shows the radial profile of $|E|(r)$ extracted along a ray from the simulation compared to~\eqref{eq:ideal_coax}. The simulated curve follows the expected $1/r$ dependence over the insulation thickness. The most visible deviations occur in the immediate vicinity of the discretised electrode ``bands'', where a Cartesian-grid representation of circular Dirichlet boundaries introduces local artefacts. Away from this region, the agreement is sufficient for the comparative defect study presented below and establishes a baseline field at mid-radius of about $|E|\approx 1.3$--$1.4~kV/mm$.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\columnwidth]{figures/baseline_radial.png}
+    \caption{\textbf{Validation against analytical solution.} Radial profile of $|E|(r)$ for the homogeneous coaxial cable (no defect). Solid line: simulation; dashed line: Eq.~\eqref{eq:ideal_coax}.}
+    \label{fig:baseline}
+\end{figure}
+
+\subsection{Air bubble ($\epsilon_r=1$)}
+
+Figures~\ref{fig:bubble_overview} and~\ref{fig:bubble_zoom} show the potential distribution and field magnitude for an air bubble of radius $r_d=0.5~mm$ at mid-radius. The global maximum field remains at the inner electrode interface and is essentially unchanged from the baseline (change $<1\%$), as expected for a small defect located far from the highest-field region.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\columnwidth]{figures/bubble_overview.png}
+    \caption{\textbf{Air bubble case: overview.} Colour map of $|E|$ showing the coaxial geometry with a 0.5~mm air bubble at mid-radius. The global maximum remains at the inner conductor.}
+    \label{fig:bubble_overview}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\columnwidth]{figures/bubble_zoom.png}
+    \caption{\textbf{Air bubble case: zoom near defect.} Left: potential contours; right: $|E|$ magnitude. The field inside the bubble is elevated relative to the surrounding XLPE.}
+    \label{fig:bubble_zoom}
+\end{figure}
+
+Locally, however, the picture is different. At the defect position the undisturbed field magnitude is $|E|_0(r_c)\approx 1.3$--$1.4~kV/mm$. Inside the air bubble the peak field reaches $|E|_\mathrm{max,bubble}\approx1.45~kV/mm$ (Table~\ref{tab:summary}). This enhancement is consistent with the classical expectation that low-permittivity voids increase the internal field relative to the surrounding dielectric~\cite{crichton1989pdmodel}.
+
+Comparing to the representative PD inception threshold $E_\mathrm{inc}\approx3~kV/mm$, we see that $|E|_\mathrm{max,bubble}$ is well below this value. Partial discharge inside this particular mid-radius bubble is therefore unlikely under the present operating conditions. However, PD risk is strongly position-dependent; an illustrative near-electrode case is discussed in Sec.~\ref{sec:sensitivity}.
+
+Figure~\ref{fig:bubble_radial} shows the radial field profile along a ray passing through the bubble. The profile matches the analytical curve except for a localised spike at the defect location.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\columnwidth]{figures/bubble_radial.png}
+    \caption{\textbf{Air bubble case: radial profile.} $|E|(r)$ along a ray through the bubble centre. The dashed line is the analytical profile for the homogeneous cable.}
+    \label{fig:bubble_radial}
+\end{figure}
+
+\subsection{Water-like inclusion ($\epsilon_r=80$)}
+
+Figures~\ref{fig:inclusion_overview} and~\ref{fig:inclusion_zoom} show results for a high-permittivity inclusion ($\epsilon_r=80$) of radius $r_d=0.3~mm$ at mid-radius, motivated by a water-like contaminant. The inclusion perturbs the equipotential lines and deflects the field lines locally, leading to a redistribution of stress in the surrounding XLPE.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\columnwidth]{figures/inclusion_overview.png}
+    \caption{\textbf{Water-like inclusion case: overview.} Colour map of $|E|$. The inclusion modifies the local field distribution but the global maximum remains near the inner conductor.}
+    \label{fig:inclusion_overview}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\columnwidth]{figures/inclusion_zoom.png}
+    \caption{\textbf{Water-like inclusion case: zoom near defect.} Left: potential contours crowd around the inclusion boundary; right: $|E|$ is suppressed inside but enhanced in the surrounding XLPE ring.}
+    \label{fig:inclusion_zoom}
+\end{figure}
+
+The most pronounced effect is a field concentration in the surrounding XLPE. In a narrow ring around the inclusion the peak field rises to $|E|_\mathrm{max,ring}\approx1.74~kV/mm$ (Table~\ref{tab:summary}), about 20\% above the defect-free peak in the same region. This local enhancement in the solid dielectric is relevant for ageing and treeing, which are driven by stress in the polymer~\cite{dissado1992electrical,kuffel2000highvoltage}.
+
+The global peak near the inner conductor is again essentially unchanged (change $<1\%$ from baseline).
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\columnwidth]{figures/inclusion_radial.png}
+    \caption{\textbf{Water-like inclusion case: radial profile.} $|E|(r)$ along a ray through the inclusion centre. The field dips inside the inclusion and rises in the surrounding XLPE.}
+    \label{fig:inclusion_radial}
+\end{figure}
+
+\subsection{\label{sec:sensitivity}Sensitivity to defect position: large void near inner conductor}
+
+To illustrate that defect \emph{position} can dominate PD risk, we consider a more severe scenario: a large air void of radius $r_d=1.5~mm$ placed close to the inner conductor. Figure~\ref{fig:large_bubble_zoom} shows that the equipotential lines and streamlines are strongly distorted and that the field inside the void increases substantially compared to the mid-radius case. The peak field inside the void reaches $|E|_\mathrm{max,void}\approx 4.53~kV/mm$ (Table~\ref{tab:summary}), which exceeds the representative inception field $E_\mathrm{inc}\approx3~kV/mm$. While this scenario is more extreme than the mid-radius bubble, it demonstrates the expected trend: voids closer to the high-field electrode are more likely to trigger PD.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\columnwidth]{figures/large_bubble_zoom.png}
+    \caption{\textbf{Large void close to the inner conductor.} Zoom near a $r_d=1.5~mm$ air bubble placed near the inner electrode. The field inside the cavity becomes significantly larger than in the mid-radius case, indicating increased PD risk.}
+    \label{fig:large_bubble_zoom}
+\end{figure}
+
+Figure~\ref{fig:large_bubble_radial} further shows how the defect modifies the radial field profile along a ray: the profile deviates strongly from the ideal coax curve in the region spanned by the void, while the far-field trend is recovered outside the defect-perturbed region.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\columnwidth]{figures/large_bubble_radial.png}
+    \caption{\textbf{Large void case: radial profile.} $|E|(r)$ along a ray passing through the large near-electrode void. The large local deviation highlights that voids located in high-field regions can dominate the insulation stress picture even when the global coax geometry is unchanged.}
+    \label{fig:large_bubble_radial}
+\end{figure}
+
+\begin{table}
+  \caption{\textbf{Summary of key field metrics (15~kV).} ``Global peak'' is the maximum nodal $|\mathbf{E}|$ in the domain. ``Local peak'' is the maximum $|\mathbf{E}|$ in the defect (bubble/inclusion) or in the surrounding XLPE ring (for the inclusion).}
+  \label{tab:summary}
+  \begin{ruledtabular}
+  \begin{tabular}{lcccc}
+    \textbf{Case} & $\epsilon_r$ & $r_d$ (mm) & Global pk & Local pk \\
+                 &             &            & (kV/mm)   & (kV/mm)  \\
+    \hline
+    Baseline                         & -- & --  & 6.03 & --   \\
+    Bubble (mid-radius)              & 1  & 0.5 & 6.03 & 1.45 \\
+    Inclusion (mid-radius)           & 80 & 0.3 & 6.04 & 1.74\textsuperscript{a} \\
+    Bubble (near inner conductor)    & 1  & 1.5 & 5.42 & 4.53 \\
+  \end{tabular}
+  \end{ruledtabular}
+
+  \vspace{0.5ex}
+  \noindent\textsuperscript{a}``Local pk'' refers to the peak in the XLPE ring around the inclusion.
+\end{table}
+
+\subsection{Model limitations and numerical uncertainty}
+
+The present study is intentionally simplified to isolate the electrostatic field redistribution caused by permittivity defects. First, the model is two-dimensional and represents an infinite-length cable with a perfectly uniform cross-section; real defects are three-dimensional and may have irregular shapes and rough interfaces that can further enhance the field. Second, the analysis is purely electrostatic and does not include finite conductivity, space-charge accumulation, temperature dependence, or time-dependent partial-discharge dynamics. These effects can change both the effective field distribution and the long-term ageing behaviour in XLPE insulation~\cite{dissado1992electrical,kuffel2000highvoltage}.
+
+On the numerical side, the circular electrodes are represented on a square (Cartesian) grid using Dirichlet ``bands''. This staircase-like representation can create small, non-physical spikes in $|\mathbf{E}|$ right next to the electrode boundary (visible in Fig.~\ref{fig:baseline}). For this reason, the most meaningful comparisons in this report use (i) radial field profiles taken a short distance away from the electrode band and (ii) the local peak fields in and around the defects. In the defect region the field changes are dominated by the real material contrast (different $\epsilon_r$) rather than by the grid representation of the electrodes. Finally, since defect-induced peaks can be sensitive to resolution when the defect is only a few grid cells across, we chose grid parameters that resolve each defect diameter by tens of nodes and verified that the qualitative conclusions (mid-radius defects are benign; near-electrode voids are critical) are robust.
+
+
+%=============================================================================
+\section{\label{sec:conclusion}Conclusion}
+%=============================================================================
+
+We have developed a finite-volume solver for the 2D electrostatic problem in a coaxial cable cross-section with spatially varying permittivity. The solver was validated against the analytical solution for a homogeneous cable and then applied to study two types of insulation defects: air bubbles and water-like inclusions.
+
+The main findings are:
+\begin{enumerate}
+    \item \textbf{Global field:} For a 15~kV, 2--10~mm coaxial cable, the peak field occurs at the inner electrode interface and is essentially unchanged ($<1\%$) by adding a small defect at mid-radius.
+    
+    \item \textbf{Air bubbles:} A 0.5~mm air void at mid-radius produces a local peak field of about 1.45~kV/mm, which is well below a representative PD inception field ($\sim$3~kV/mm). In contrast, a larger 1.5~mm void placed closer to the inner conductor reaches about 4.53~kV/mm inside the cavity, indicating that PD risk is dominated by defect position relative to the high-field electrode.
+    
+    \item \textbf{Water-like inclusions:} A high-permittivity inclusion ($\epsilon_r=80$) increases the peak field in a surrounding XLPE ring to about 1.74~kV/mm (about 20\% above the defect-free value at the same radius). Such local stress concentrations in the polymer can contribute to long-term ageing even when the global field is unaffected.
+\end{enumerate}
+
+These results confirm that small, isolated defects at mid-radius have a limited effect on the overall field distribution, but can create localised stress concentrations that may initiate degradation mechanisms over time.
+
+
+
+
+
+
+
+
+
+%=============================================================================
+\bibliography{biblio}
+%=============================================================================
+
+\end{document}
