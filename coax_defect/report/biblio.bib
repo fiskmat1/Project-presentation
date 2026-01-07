@@ -5,7 +5,8 @@
   edition   = {3rd},
   year      = {1999},
   publisher = {Wiley},
-  address   = {New York}
+  address   = {New York},
+  note      = {Used for the analytical electrostatics background and the ideal coaxial-field expression.}
 }
 
 @book{kuffel2000highvoltage,
@@ -14,7 +15,8 @@
   edition   = {2nd},
   year      = {2000},
   publisher = {Butterworth-Heinemann},
-  address   = {Oxford}
+  address   = {Oxford},
+  note      = {Used for background on high-voltage cable insulation and typical partial-discharge/breakdown considerations.}
 }
 
 @book{nordling2020physics,
@@ -23,7 +25,8 @@
   edition   = {9th},
   year      = {2020},
   publisher = {Studentlitteratur},
-  address   = {Lund}
+  address   = {Lund},
+  note      = {Used for typical material-property values (e.g., relative permittivity for common media).}
 }
 
 % Classic breakdown and discharge papers
@@ -33,7 +36,11 @@
   journal = {Physical Review},
   year    = {1940},
   volume  = {57},
-  pages   = {722--728}
+  number  = {8},
+  pages   = {722--728},
+  doi     = {10.1103/PhysRev.57.722},
+  url     = {https://doi.org/10.1103/PhysRev.57.722},
+  note    = {Used as a classical reference when discussing discharge inception and representative breakdown-field scales.}
 }
 
 % Numerical methods
@@ -45,7 +52,8 @@
   editor    = {Ciarlet, P. G. and Lions, J.-L.},
   publisher = {Elsevier},
   year      = {2000},
-  pages     = {713--1020}
+  pages     = {713--1020},
+  note      = {Used for the finite-volume perspective and treatment of heterogeneous media (flux continuity at interfaces).}
 }
 
 @book{taflove2005fdtd,
@@ -54,16 +62,8 @@
   edition   = {3rd},
   year      = {2005},
   publisher = {Artech House},
-  address   = {Boston}
-}
-
-@book{saad2003iterative,
-  author    = {Saad, Yousef},
-  title     = {Iterative Methods for Sparse Linear Systems},
-  edition   = {2nd},
-  year      = {2003},
-  publisher = {Society for Industrial and Applied Mathematics},
-  address   = {Philadelphia, PA}
+  address   = {Boston},
+  note      = {Used for finite-difference discretisation background and discussion of interface/heterogeneous-media issues.}
 }
 
 % Dielectric ageing and partial discharge
@@ -72,7 +72,8 @@
   title     = {Electrical Degradation and Breakdown in Polymers},
   year      = {1992},
   publisher = {Peter Peregrinus Ltd.},
-  address   = {London}
+  address   = {London},
+  note      = {Used for background on electrical ageing mechanisms (treeing, degradation) in polymer insulation.}
 }
 
 @article{crichton1989pdmodel,
@@ -82,7 +83,10 @@
   year    = {1989},
   volume  = {24},
   number  = {2},
-  pages   = {335--342}
+  pages   = {335--342},
+  doi     = {10.1109/14.90292},
+  url     = {https://doi.org/10.1109/14.90292},
+  note    = {Used for the classical void field-enhancement model and comparison to simulated enhancement.}
 }
 
 % Recent FEM/simulation studies on voids in XLPE
@@ -93,7 +97,10 @@
   year    = {2011},
   volume  = {18},
   number  = {2},
-  pages   = {432--443}
+  pages   = {432--443},
+  doi     = {10.1109/TDEI.2011.5739447},
+  url     = {https://doi.org/10.1109/TDEI.2011.5739447},
+  note    = {Additional background reading on partial-discharge modelling in spherical cavities (not directly cited in the report text).}
 }
 
 % Industry reports
@@ -102,5 +109,17 @@
   title       = {Update of Service Experience of {HV} Underground and Submarine Cable Systems},
   institution = {CIGRE},
   year        = {2009},
-  number      = {Technical Brochure 379}
+  number      = {Technical Brochure 379},
+  url         = {https://www.e-cigre.org/publications/detail/815-update-of-service-experience-of-hv-underground-and-submarine-cable-systems.html},
+  note        = {Used for the reported share of insulation-system faults in internal failures of extruded HV cable systems.}
+}
+
+@book{saad2003iterative,
+  author    = {Saad, Yousef},
+  title     = {Iterative Methods for Sparse Linear Systems},
+  edition   = {2nd},
+  year      = {2003},
+  publisher = {Society for Industrial and Applied Mathematics},
+  address   = {Philadelphia, PA},
+  note      = {Used for the iterative-solver background (Gauss--Seidel/SOR methods).}
 }

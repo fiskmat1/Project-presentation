@@ -1,4 +1,0 @@
-PeakE, 9.460147e+07
-PeakX, 2.000000e-02
-PeakY, 2.979866e-03
-RaetherMeekMax, 17.425159
