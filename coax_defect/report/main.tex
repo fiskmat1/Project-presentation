@@ -1,7 +1,4 @@
-% ****** Electric Field Concentration in Coaxial HV Cables ******
-%
-\documentclass[%
- reprint,
+\documentclass[ reprint,
  amsmath,amssymb,
  aps,
 ]{revtex4-2}
@@ -35,9 +32,7 @@ Agnese Callegari
 \maketitle
 
 
-%=============================================================================
 \section{\label{sec:intro}Introduction}
-%=============================================================================
 
 Coaxial and power cables use solid polymer insulation, typically cross-linked polyethylene (XLPE) with relative permittivity $\epsilon_r \approx 2.3$, to maintain a controlled electric field between the high-voltage conductor and the grounded shield~\cite{kuffel2000highvoltage}. In an ideal, defect-free cable the electric field is purely radial and follows the analytical formula
 \begin{equation}
@@ -53,9 +48,7 @@ Considerable research has been made to understand the field enhancement caused b
 In this project we develop a finite-volume solver on a Cartesian grid to study a 2D cross-section of a coaxial cable containing a single circular defect. We verify the solver against the analytical solution~\eqref{eq:ideal_coax}, then examine two defect scenarios: (i) an air bubble ($\epsilon_r = 1$) and (ii) a water-like inclusion ($\epsilon_r = 80$). We extract peak fields in the XLPE and inside the defect, compare them to typical PD inception values from the literature~\cite{meek1940breakdown,kuffel2000highvoltage}, and discuss the implications for cable reliability.
 
 
-%=============================================================================
 \section{\label{sec:overview}Overview}
-%=============================================================================
 
 Several numerical techniques are available for solving electrostatic problems with spatially varying permittivity. Table~\ref{tab:methods} summarises the main options and their suitability for the present study.
 
@@ -98,9 +91,7 @@ BEM reduces the problem to integrals over material interfaces only, which can be
 We adopt a finite-volume-inspired approach on a Cartesian grid. This combines the simplicity of structured grids with correct handling of $\epsilon$-jumps (via flux continuity) and avoids the need for an external mesh generator.
 
 
-%=============================================================================
 \section{\label{sec:method}Method}
-%=============================================================================
 
 \begin{figure*}
     \centering
@@ -169,9 +160,7 @@ and the magnitude is $|\mathbf{E}| = \sqrt{E_x^2 + E_y^2}$. The values we want  
 For the XLPE insulation the relevant figure is the peak electric field in the solid insulation. For air-filled voids, partial discharge can initiate when the field inside the void exceeds a inception field. At atmospheric pressure and gap sizes of order 1~mm, a commonly cited threshold is $E_\mathrm{inc}\approx3~kV/mm$~\cite{meek1940breakdown,kuffel2000highvoltage}. If the simulated peak is well below this, PD most likely won't happen but if it's close or higher, PD becomes a possibility.
 
 
-%=============================================================================
 \section{\label{sec:results}Results and Discussion}
-%=============================================================================
 
 \subsection{Validation: homogeneous coaxial cable}
 
@@ -260,18 +249,16 @@ The present study is intentionally simplified to isolate the electrostatic field
 On the numerical side, circular electrodes are represented on a Cartesian grid through Dirichlet ``bands''. This discretisation introduces local artefacts in $|\mathbf{E}|$ very close to the electrode interface (visible in Fig.~\ref{fig:baseline}); for this reason, the physically relevant comparisons in this report focus on (i) radial profiles away from the electrode band and (ii) local peak values in and around the defects. Finally, since defect peaks can be sensitive to resolution when the defect is only a few grid cells across, we chose grid parameters that resolve each defect diameter by many grid points (tens of nodes).
 
 
-%=============================================================================
 \section{\label{sec:conclusion}Conclusions and Outlook}
-%=============================================================================
 
 We have developed a finite-volume solver for the 2D electrostatic problem in a coaxial cable cross-section with varying permittivity. The solver was validated against the analytical solution for a homogeneous cable and then used to study two types of insulation defects: air bubbles and water-like inclusions.
 
 The main findings are:
 \begin{enumerate}
     \item \textbf{Global field:} For a 15~kV, 2--10~mm coaxial cable, the peak field occurs at the inner electrode interface and is essentially unchanged ($<1\%$) by adding a small defect at mid-radius.
-    
+
     \item \textbf{Air bubbles:} A 0.5~mm air void at mid-radius produces a local peak field of about 1.45~kV/mm, which is well below a representative PD inception field ($\sim$3~kV/mm). In contrast, a larger 1.5~mm void placed closer to the inner conductor reaches about 4.53~kV/mm inside the cavity, indicating that PD risk is dominated by defect position relative to the high-field electrode.
-    
+
     \item \textbf{Water-like inclusions:} A high-permittivity inclusion ($\epsilon_r=80$) increases the peak field in a surrounding XLPE ring to about 1.74~kV/mm (about 20\% above the defect-free value at the same radius). Such local stress concentrations in the polymer can contribute to long-term ageing even when the global field is unaffected.
 \end{enumerate}
 
@@ -295,8 +282,6 @@ The code used to generate the results and the figures, along with the simulation
 
 
 
-%=============================================================================
 \bibliography{biblio}
-%=============================================================================
 
 \end{document}
