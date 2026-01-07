@@ -270,3 +270,5 @@ def plot_radial_diagnostics(problem, V, phi_deg=0.0, num_samples=400, output_pat
     if output_path:
         fig.savefig(output_path, dpi=250)
     return fig
+
+

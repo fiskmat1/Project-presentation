@@ -3,7 +3,7 @@ import json
 import numpy as np
 import argparse
 from geometry import build_problem, solve_potential, compute_field, find_peak_field
-from viz import plot_overview, plot_zoom_near_defect, plot_radial_diagnostics
+from plots import plot_overview, plot_zoom_near_defect, plot_radial_diagnostics
 
 def _m_to_mm_str(v):
     return f'{v * 1000.0:.3f}mm'
@@ -78,6 +78,7 @@ def run_case(Rin=0.002, Rout=0.01, V0=15000.0, epsr=2.3, defect_type='bubble', d
         json.dump(metrics, f, indent=2)
     if make_plots:
         title = f'Coaxial cable V0={V0 / 1000.0:.0f} kV, Rin={Rin * 1000.0:.2f} mm, Rout={Rout * 1000.0:.2f} mm, epsr={epsr:.2f}, defect={defect_type}'
+       
         plot_overview(problem, V, title=title, output_path=os.path.join(out_case, 'overview.png'))
         plot_zoom_near_defect(problem, V, output_path=os.path.join(out_case, 'zoom_defect.png'), title='Zoom near defect')
         plot_radial_diagnostics(problem, V, phi_deg=0.0, output_path=os.path.join(out_case, 'radial_profiles.png'), title='Radial |E|(r) vs ideal')
