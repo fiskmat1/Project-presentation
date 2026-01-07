@@ -3,12 +3,35 @@ import json
 import numpy as np
 import argparse
 
-from .geometry import (
-	build_problem,
-	solve_potential,
-	compute_field,
-	find_peak_field,
-)
+"""
+This module can be run in two ways:
+
+1) As a package module (recommended):
+   python3 -m coax_defect.run ...
+
+2) As a plain script (works even without __init__.py):
+   python3 coax_defect/run.py ...
+"""
+
+try:
+	# Package-style imports
+	from .geometry import (
+		build_problem,
+		solve_potential,
+		compute_field,
+		find_peak_field,
+	)
+except ImportError:  # pragma: no cover
+	# Script-style fallback (no package context)
+	import sys
+
+	sys.path.insert(0, os.path.dirname(__file__))
+	from geometry import (  # type: ignore
+		build_problem,
+		solve_potential,
+		compute_field,
+		find_peak_field,
+	)
 
 
 def case_folder(Rin, Rout, V0, epsr, defect_type, defect_radius, defect_epsr, outdir, name):
@@ -143,7 +166,10 @@ def run_case(
 
 	if make_plots:
 		# Import plotting tools lazily so that pure-metrics runs avoid Matplotlib overhead
-		from .viz import plot_overview, plot_zoom_near_defect, plot_radial_diagnostics
+		try:
+			from .viz import plot_overview, plot_zoom_near_defect, plot_radial_diagnostics
+		except ImportError:  # pragma: no cover
+			from viz import plot_overview, plot_zoom_near_defect, plot_radial_diagnostics  # type: ignore
 
 		title = (
 			"Coaxial cable V0=%.0f kV, Rin=%.2f mm, Rout=%.2f mm, epsr=%.2f, defect=%s"

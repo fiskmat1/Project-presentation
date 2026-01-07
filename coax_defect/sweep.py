@@ -3,7 +3,15 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from .geometry import build_problem, solve_potential, compute_field
+try:
+    # Package-style import
+    from .geometry import build_problem, solve_potential, compute_field
+except ImportError:  # pragma: no cover
+    # Script-style fallback (no package context)
+    import sys
+
+    sys.path.insert(0, os.path.dirname(__file__))
+    from geometry import build_problem, solve_potential, compute_field  # type: ignore
 
 
 def run_sweep():

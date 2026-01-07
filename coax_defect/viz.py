@@ -2,7 +2,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 
-from .geometry import compute_field
+try:
+	# Package-style import
+	from .geometry import compute_field
+except ImportError:  # pragma: no cover
+	# Script-style fallback (no package context)
+	import os
+	import sys
+
+	sys.path.insert(0, os.path.dirname(__file__))
+	from geometry import compute_field  # type: ignore
 
 
 def _extent(problem):
